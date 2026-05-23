@@ -63,7 +63,7 @@ function AddonModal({ item, addons, loading, onClose, onConfirm }) {
 
           <button
             onClick={onClose}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border-0 bg-white/10 text-[22px] text-white transition hover:bg-white/15"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border-0 bg-theme-surface text-[22px] text-white transition hover:bg-theme-surface"
           >
             ×
           </button>

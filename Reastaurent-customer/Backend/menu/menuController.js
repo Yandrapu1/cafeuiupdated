@@ -51,9 +51,9 @@ const getCategory = async (req, res) => {
 
 const getItemsByCategory = async (req, res) => {
   try {
-    const { category_id, page = 1, limit = 5 } = req.body;
+    const { category_id, page = 1, limit = 5, search = "" } = req.body;
 
-    if (!category_id) {
+    if (!category_id && category_id !== 0) {
       return res.status(400).json({
         success: false,
         message: "category_id is required",
@@ -64,7 +64,7 @@ const getItemsByCategory = async (req, res) => {
 
     const pageNumber = Number(page) || 1;
     const limitNumber = Number(limit) || 5;
-    const cacheKey = `${category_id}_${pageNumber}_${limitNumber}`;
+    const cacheKey = `${category_id}_${pageNumber}_${limitNumber}_${search}`;
 
     if (isCacheValid(cache.items[cacheKey])) {
       return res.status(200).json({
@@ -75,7 +75,7 @@ const getItemsByCategory = async (req, res) => {
 
     const offset = (pageNumber - 1) * limitNumber;
 
-    const itemsQuery = `
+    let itemsQuery = `
       SELECT
         id,
         category_id,
@@ -90,23 +90,35 @@ const getItemsByCategory = async (req, res) => {
         is_veg,
         is_active
       FROM items
-      WHERE ${isAll ? "1=1" : "category_id = $1"}
-        AND is_deleted = 0
+      WHERE is_deleted = 0
         AND is_active = 1
-      ORDER BY id DESC
-      LIMIT ${isAll ? "$1 OFFSET $2" : "$2 OFFSET $3"}
     `;
-
-    const countQuery = `
+    
+    let countQuery = `
       SELECT COUNT(*) AS total
       FROM items
-      WHERE ${isAll ? "1=1" : "category_id = $1"}
-        AND is_deleted = 0
+      WHERE is_deleted = 0
         AND is_active = 1
     `;
 
-    const itemsParams = isAll ? [limitNumber, offset] : [category_id, limitNumber, offset];
-    const countParams = isAll ? [] : [category_id];
+    const params = [];
+    
+    if (!isAll) {
+      params.push(category_id);
+      itemsQuery += ` AND category_id = $${params.length}`;
+      countQuery += ` AND category_id = $${params.length}`;
+    }
+
+    if (search.trim()) {
+      params.push(`%${search.trim().toLowerCase()}%`);
+      itemsQuery += ` AND LOWER(item_name) LIKE $${params.length}`;
+      countQuery += ` AND LOWER(item_name) LIKE $${params.length}`;
+    }
+
+    itemsQuery += ` ORDER BY id DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+    
+    const itemsParams = [...params, limitNumber, offset];
+    const countParams = params;
 
     const [itemsResult, countResult] = await Promise.all([
       db.query(itemsQuery, itemsParams),
@@ -228,8 +240,53 @@ const getItemAddons = async (req, res) => {
   }
 };
 
+const getPopularItems = async (req, res) => {
+  try {
+    const limitNumber = req.query.limit ? Number(req.query.limit) : 4;
+    
+    // We can cache this similarly in a real app, but for now just query directly
+    const query = `
+      SELECT
+        id,
+        category_id,
+        item_name,
+        item_description,
+        item_image,
+        price,
+        discount_price,
+        preparation_time,
+        is_popular,
+        is_new,
+        is_veg,
+        is_active
+      FROM items
+      WHERE is_deleted = 0
+        AND is_active = 1
+        AND is_popular = 1
+      ORDER BY id DESC
+      LIMIT $1
+    `;
+
+    const result = await db.query(query, [limitNumber]);
+    const items = result.rows.map((row) => attachImageUrl(req, row, "item_image"));
+
+    return res.status(200).json({
+      success: true,
+      data: items,
+    });
+  } catch (error) {
+    console.error("Error fetching popular items:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch popular items",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getCategory,
   getItemsByCategory,
   getItemAddons,
+  getPopularItems,
 };

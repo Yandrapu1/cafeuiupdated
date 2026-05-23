@@ -38,7 +38,7 @@
     @apply bg-cafe-bg;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-white/10 hover:bg-white/20;
+    @apply rounded-full bg-black/10 hover:bg-black/20;
   }
 }
 
@@ -48,11 +48,11 @@
   }
 
   .customer-card {
-    @apply rounded-2xl border border-white/5 bg-white/[0.02] p-[18px] backdrop-blur-xl transition-all duration-300 hover:border-white/10 hover:bg-white/[0.04];
+    @apply rounded-2xl border border-black/5 bg-white shadow-sm p-[18px] transition-all duration-300 hover:border-black/10 hover:shadow-premium;
   }
 
   .customer-input {
-    @apply w-full rounded-xl border border-white/10 bg-white/[0.03] px-[16px] py-3.5 text-sm text-white outline-none transition-all duration-300 focus:border-cafe-gold/50 focus:bg-white/[0.05] focus:ring-4 focus:ring-cafe-gold/10 placeholder:text-white/30;
+    @apply w-full rounded-xl border border-black/10 bg-black/[0.02] px-[16px] py-3.5 text-sm text-[#110e0d] outline-none transition-all duration-300 focus:border-cafe-gold/50 focus:bg-white focus:ring-4 focus:ring-cafe-gold/10 placeholder:text-black/30;
   }
 
   .customer-textarea {
@@ -64,11 +64,11 @@
   }
 
   .customer-secondary-button {
-    @apply rounded-full border border-white/10 bg-white/[0.03] px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:bg-white/[0.08] hover:shadow-glow;
+    @apply rounded-full border border-black/10 bg-white px-6 py-3.5 text-sm font-semibold text-[#110e0d] shadow-sm transition-all duration-300 hover:bg-gray-50 hover:shadow-glow;
   }
 
   .customer-chip {
-    @apply inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-white/70 backdrop-blur-md transition-all duration-300;
+    @apply inline-flex items-center rounded-full border border-black/10 bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-black/70 shadow-sm transition-all duration-300;
   }
 
   .customer-tab-button {
@@ -80,14 +80,14 @@
   }
 
   .customer-tab-button-inactive {
-    @apply bg-white/[0.03] text-white/60 hover:bg-white/[0.08] hover:text-white;
+    @apply bg-black/5 text-black/60 hover:bg-black/10 hover:text-[#110e0d];
   }
 
   .customer-drawer-overlay {
-    @apply fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm animate-customer-overlay-in;
+    @apply fixed inset-0 z-[120] bg-black/40 backdrop-blur-sm animate-customer-overlay-in;
   }
 
   .customer-drawer-panel {
-    @apply fixed right-0 top-0 z-[121] h-screen w-full max-w-[480px] overflow-y-auto border-l border-white/5 bg-[#110e0d]/95 p-5 shadow-premium backdrop-blur-2xl animate-customer-drawer-in sm:p-8;
+    @apply fixed right-0 top-0 z-[121] h-screen w-full max-w-[480px] overflow-y-auto border-l border-black/5 bg-white p-5 shadow-premium animate-customer-drawer-in sm:p-8;
   }
 }

@@ -60,7 +60,7 @@ function InfoBlock({ title, children, icon: Icon }) {
   return (
     <section className="customer-card">
       <div className="flex items-center gap-3 border-b border-white/5 pb-4">
-        {Icon && <Icon className="h-5 w-5 text-cafe-gold" />}
+        {Icon && <Icon className="h-5 w-5 text-theme-accent" />}
         <h2 className="m-0 font-serif text-lg font-bold text-white">{title}</h2>
       </div>
       <div className="mt-4 grid gap-3 font-sans text-sm font-light leading-relaxed text-white/70">
@@ -118,11 +118,11 @@ function OrderDetails() {
   }, [id]);
 
   return (
-    <main className="min-h-screen bg-cafe-bg px-4 pb-20 pt-28 text-white sm:px-6">
+    <main className="min-h-screen bg-theme-bg px-4 pb-20 pt-28 text-white sm:px-6">
       <div className="mx-auto grid w-full max-w-5xl gap-6">
         <header className="customer-card flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="m-0 font-sans text-xs font-bold uppercase tracking-[0.2em] text-cafe-gold">
+            <p className="m-0 font-sans text-xs font-bold uppercase tracking-[0.2em] text-theme-accent">
               Order Details
             </p>
             <h1 className="m-0 mt-2 font-serif text-3xl font-bold sm:text-4xl">
@@ -135,7 +135,7 @@ function OrderDetails() {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-6 py-3 font-sans text-sm font-bold tracking-wider text-white transition-colors hover:bg-cafe-gold hover:text-[#110e0d]"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-theme-surface px-6 py-3 font-sans text-sm font-bold tracking-wider text-white transition-colors hover:bg-theme-accent hover:text-theme-inverse-text"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Home
@@ -165,7 +165,7 @@ function OrderDetails() {
 
               <InfoBlock title="Order Status" icon={Package}>
                 <div className="capitalize">
-                  Order: <span className="font-bold text-cafe-gold">{String(order.order_status || "-").replace(/_/g, " ")}</span>
+                  Order: <span className="font-bold text-theme-accent">{String(order.order_status || "-").replace(/_/g, " ")}</span>
                 </div>
                 <div className="capitalize">
                   Payment: {String(order.payment_status || "-").replace(/_/g, " ")}
@@ -189,7 +189,7 @@ function OrderDetails() {
 
             <InfoBlock title="Order Items" icon={Receipt}>
               {(order.items || []).map((item) => (
-                <div key={item.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 transition-colors hover:bg-white/5">
+                <div key={item.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4 transition-colors hover:bg-theme-surface">
                   <div className="flex flex-wrap justify-between gap-3">
                     <div>
                       <div className="font-serif text-lg font-bold text-white">{item.item_name}</div>
@@ -197,7 +197,7 @@ function OrderDetails() {
                         Qty {item.quantity} × {formatCurrency(item.final_unit_price, order.currency_code)}
                       </div>
                     </div>
-                    <div className="font-serif text-lg font-bold text-cafe-gold">
+                    <div className="font-serif text-lg font-bold text-theme-accent">
                       {formatCurrency(item.line_total, order.currency_code)}
                     </div>
                   </div>
@@ -220,7 +220,7 @@ function OrderDetails() {
                 <div>No payment record found for this order.</div>
               ) : (
                 order.payments.map((payment) => (
-                  <div key={payment.id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div key={payment.id} className="rounded-2xl border border-white/10 bg-theme-border p-4">
                     <div className="flex flex-wrap justify-between gap-3">
                       <div className="font-extrabold capitalize text-white">
                         {String(payment.status || "-").replace(/_/g, " ")}
@@ -243,7 +243,7 @@ function OrderDetails() {
                         <div className="text-red-200">Failure: {payment.failure_message}</div>
                       ) : null}
                     </div>
-                    <details className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
+                    <details className="mt-3 rounded-xl border border-white/10 bg-theme-border p-3">
                       <summary className="cursor-pointer text-xs font-bold text-white">
                         Metadata
                       </summary>
@@ -251,7 +251,7 @@ function OrderDetails() {
                         {formatJson(payment.metadata)}
                       </pre>
                     </details>
-                    <details className="mt-2 rounded-xl border border-white/10 bg-black/20 p-3">
+                    <details className="mt-2 rounded-xl border border-white/10 bg-theme-border p-3">
                       <summary className="cursor-pointer text-xs font-bold text-white">
                         Raw Event
                       </summary>
@@ -285,7 +285,7 @@ function OrderDetails() {
                 <span className="text-white/70">Delivery</span>
                 <span className="font-medium text-white">{formatCurrency(order.delivery_fee, order.currency_code)}</span>
               </div>
-              <div className="mt-2 flex justify-between gap-3 border-t border-white/10 pt-4 font-serif text-2xl font-bold text-cafe-gold">
+              <div className="mt-2 flex justify-between gap-3 border-t border-white/10 pt-4 font-serif text-2xl font-bold text-theme-accent">
                 <span>Total</span>
                 <span>{formatCurrency(order.total_amount, order.currency_code)}</span>
               </div>

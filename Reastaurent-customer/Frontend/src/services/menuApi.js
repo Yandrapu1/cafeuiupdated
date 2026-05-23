@@ -2,6 +2,7 @@ import {
   CATEGORY_LIST,
   ITEM_ADDONS,
   ITEMS_BY_CATEGORY,
+  MENU_POPULAR_ITEMS,
 } from "../Utils/Constant";
 
 const postJson = async (url, body = {}) => {
@@ -27,14 +28,19 @@ export const fetchCategories = async () => {
   return data.data || [];
 };
 
-export const fetchItemsByCategory = async (categoryId, page = 1, limit = 12) => {
+export const fetchItemsByCategory = async (categoryId, page = 1, limit = 12, search = "") => {
   const data = await postJson(ITEMS_BY_CATEGORY, {
     category_id: categoryId,
     page,
     limit,
+    search,
   });
 
-  return data;
+  return {
+    items: data.data || [],
+    totalPages: data.pagination?.totalPages || 1,
+    currentPage: data.pagination?.currentPage || 1,
+  };
 };
 
 export const fetchItemAddons = async (itemId) => {
@@ -42,5 +48,16 @@ export const fetchItemAddons = async (itemId) => {
     item_id: itemId,
   });
 
+  return data.data || [];
+};
+
+export const fetchPopularItems = async (limit = 4) => {
+  const response = await fetch(`${MENU_POPULAR_ITEMS}?limit=${limit}`);
+  const data = await response.json();
+  
+  if (!response.ok || !data.success) {
+    throw new Error(data.message || `Request failed for popular items`);
+  }
+  
   return data.data || [];
 };

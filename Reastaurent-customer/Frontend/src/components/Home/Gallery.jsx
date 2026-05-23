@@ -21,7 +21,7 @@ export default function Gallery() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <span className="mb-4 inline-block font-sans text-sm font-bold uppercase tracking-[0.2em] text-cafe-gold">
+          <span className="mb-4 inline-block font-sans text-sm font-bold uppercase tracking-[0.2em] text-theme-accent">
             Atmosphere
           </span>
           <h2 className="font-serif text-4xl font-bold text-white md:text-5xl">
@@ -51,7 +51,7 @@ export default function Gallery() {
                   alt={`Cafe Atmosphere ${index + 1}`}
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute inset-0 bg-theme-border" />
               </div>
             </SwiperSlide>
           ))}

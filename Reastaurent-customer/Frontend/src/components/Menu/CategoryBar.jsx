@@ -35,7 +35,7 @@ function CategoryBar({ categories, selectedCategory, onSelect, loading }) {
               onMouseLeave={() => setHoveredId(null)}
               className={`flex min-w-[120px] flex-shrink-0 cursor-pointer flex-col items-center gap-3 rounded-3xl border border-white/5 p-4 transition-all duration-300 ${
                 isSelected
-                  ? "bg-cafe-gold text-[#110e0d] shadow-warm scale-[1.02]"
+                  ? "bg-theme-accent text-theme-inverse-text shadow-warm scale-[1.02]"
                   : isHovered
                     ? "bg-white/[0.08] text-white border-white/20"
                     : "bg-white/[0.02] text-white/60"
@@ -52,7 +52,7 @@ function CategoryBar({ categories, selectedCategory, onSelect, loading }) {
                   />
                 </div>
               ) : (
-                <div className={`grid h-14 w-14 place-items-center rounded-full border border-white/10 text-2xl ${isSelected ? "bg-[#110e0d]/10" : "bg-white/5"}`}>
+                <div className={`grid h-14 w-14 place-items-center rounded-full border border-white/10 text-2xl ${isSelected ? "bg-[#110e0d]/10" : "bg-theme-surface"}`}>
                   ☕
                 </div>
               )}

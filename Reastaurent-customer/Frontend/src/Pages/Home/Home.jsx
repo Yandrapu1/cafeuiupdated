@@ -1,814 +1,205 @@
-import { useEffect, useEffectEvent, useRef, useState, lazy, Suspense } from "react";
-import { Header } from "../../components/common";
-import Footer from "../../components/common/Footer";
-import { CategoryBar, ItemGrid, CategoryGrid } from "../../components/Menu";
+import { useState, useEffect } from "react";
 import Hero from "../../components/Home/Hero";
-import About from "../../components/Home/About";
-import Gallery from "../../components/Home/Gallery";
-import Testimonials from "../../components/Home/Testimonials";
+import { ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { fetchCategories, fetchPopularItems } from "../../services/menuApi";
+import { getImageUrl } from "../../Utils/imageUrl";
 
-import {
-  fetchCategories,
-  fetchItemAddons,
-  fetchItemsByCategory,
-} from "../../services/menuApi";
-import {
-  applyAddonChange,
-  applyCategoryChange,
-  applyItemChange,
-} from "../../realtime/applyMenuChange";
-import { fetchRestaurantSettings } from "../../services/restaurantApi";
-import { useMenuUpdates } from "../../realtime/useMenuUpdates";
-import { useCustomerRealtimeUpdates } from "../../realtime/useCustomerRealtimeUpdates";
-import { customerAuthStorage } from "../../auth/customerAuthStorage";
-import { fetchCustomerProfile } from "../../services/customerProfileApi";
-import { fetchCustomerUnreadNotificationSummary } from "../../services/customerNotificationApi";
-import { confirmCustomerCheckoutSession } from "../../services/paymentApi";
-import {
-  startCustomerNotificationAlert,
-  stopCustomerNotificationAlert,
-} from "../../Utils/notificationSound";
-
-const CartDrawer = lazy(() => import("../../components/Cart/CartDrawer"));
-const AddonModal = lazy(() => import("../../components/Addons/AddonModal"));
-const CustomerDrawer = lazy(() => import("../../components/customer/CustomerDrawer"));
-
-function Home() {
+export default function Home() {
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [items, setItems] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  const [loadingItems, setLoadingItems] = useState(false);
-  const [restaurantSettings, setRestaurantSettings] = useState(null);
-  const [cart, setCart] = useState([]);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [addonCache, setAddonCache] = useState({});
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedItemAddons, setSelectedItemAddons] = useState([]);
-  const [addonModalOpen, setAddonModalOpen] = useState(false);
-  const [loadingAddons, setLoadingAddons] = useState(false);
-  const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
-  const [customer, setCustomer] = useState(customerAuthStorage.getCustomer());
-  const [customerDrawerTab, setCustomerDrawerTab] = useState("profile");
-  const [ordersRefreshKey, setOrdersRefreshKey] = useState(0);
-  const [notificationsRefreshKey, setNotificationsRefreshKey] = useState(0);
-  const [notificationSummary, setNotificationSummary] = useState({
-    unreadCount: 0,
-    notifications: [],
-  });
-  const [checkoutResult, setCheckoutResult] = useState({
-    status: "idle",
-    message: "",
-    order: null,
-  });
-
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const sentinelRef = useRef(null);
-
-  const selectedCategoryRef = useRef(selectedCategory);
-  const selectedItemRef = useRef(selectedItem);
-  const itemsRef = useRef(items);
-  const addonCacheRef = useRef(addonCache);
-  const selectedItemAddonsRef = useRef(selectedItemAddons);
-  const skipNextSelectedCategoryFetchRef = useRef(false);
-  const previousNotificationCountRef = useRef(0);
-  const hasLoadedNotificationSummaryRef = useRef(false);
+  const [popularItems, setPopularItems] = useState([]);
 
   useEffect(() => {
-    selectedCategoryRef.current = selectedCategory;
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    selectedItemRef.current = selectedItem;
-  }, [selectedItem]);
-
-  useEffect(() => {
-    itemsRef.current = items;
-  }, [items]);
-
-  useEffect(() => {
-    addonCacheRef.current = addonCache;
-  }, [addonCache]);
-
-  useEffect(() => {
-    selectedItemAddonsRef.current = selectedItemAddons;
-  }, [selectedItemAddons]);
-
-  const loadCategories = useEffectEvent(async (preferredCategoryId = null) => {
-    setLoadingCategories(true);
-
-    try {
-      const rawCategories = await fetchCategories();
-      const nextCategories = [
-        { id: "all", category_name: "All", category_image: null },
-        ...rawCategories,
-      ];
-
-      const requestedCategoryId =
-        preferredCategoryId ?? selectedCategoryRef.current;
-
-      const hasRequestedCategory = nextCategories.some(
-        (category) => String(category.id) === String(requestedCategoryId)
-      );
-
-      const nextSelectedCategory = hasRequestedCategory
-        ? requestedCategoryId
-        : null;
-
-      setCategories(nextCategories);
-      setSelectedCategory(nextSelectedCategory);
-
-      return nextSelectedCategory;
-    } catch (error) {
-      console.error("Failed to fetch categories:", error);
-      setCategories([]);
-      setSelectedCategory(null);
-      return null;
-    } finally {
-      setLoadingCategories(false);
-    }
-  });
-
-  const loadItems = useEffectEvent(async (categoryId, reset = true) => {
-    if (!categoryId) {
-      setItems([]);
-      setCurrentPage(1);
-      setTotalPages(1);
-      return;
-    }
-
-    const pageToFetch = reset ? 1 : currentPage + 1;
-    const fetchLimit = 12; // 3 rows of 4 items or 4 rows of 3 items
-
-    if (reset) {
-      setLoadingItems(true);
-      setCurrentPage(1);
-    } else {
-      setIsFetchingMore(true);
-    }
-
-    try {
-      const response = await fetchItemsByCategory(categoryId, pageToFetch, fetchLimit);
-      const nextItems = response.data || [];
-      const pagination = response.pagination || {};
-
-      if (reset) {
-        setItems(nextItems);
-      } else {
-        setItems((prev) => [...prev, ...nextItems]);
-      }
-
-      setCurrentPage(pageToFetch);
-      setTotalPages(pagination.totalPages || 1);
-    } catch (error) {
-      console.error("Failed to fetch items:", error);
-      if (reset) {
-        setItems([]);
-      }
-    } finally {
-      if (reset) {
-        setLoadingItems(false);
-      } else {
-        setIsFetchingMore(false);
-      }
-    }
-  });
-
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    if (loadingItems || isFetchingMore || currentPage >= totalPages || !selectedCategory) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          void loadItems(selectedCategory, false);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const currentSentinel = sentinelRef.current;
-    if (currentSentinel) {
-      observer.observe(currentSentinel);
-    }
-
-    return () => {
-      if (currentSentinel) {
-        observer.unobserve(currentSentinel);
-      }
-    };
-  }, [loadingItems, isFetchingMore, currentPage, totalPages, selectedCategory]);
-
-  const loadAddonsForItem = useEffectEvent(async (item, options = {}) => {
-    const { useCache = true, openModal = true } = options;
-
-    if (!item) {
-      return [];
-    }
-
-    setLoadingAddons(true);
-
-    try {
-      if (useCache && addonCache[item.id]) {
-        const cachedAddons = addonCache[item.id];
-
-        setSelectedItemAddons(cachedAddons);
-
-        if (openModal && cachedAddons.length > 0) {
-          setAddonModalOpen(true);
-        }
-
-        return cachedAddons;
-      }
-
-      const addons = await fetchItemAddons(item.id);
-
-      setAddonCache((prev) => ({
-        ...prev,
-        [item.id]: addons,
-      }));
-      setSelectedItemAddons(addons);
-
-      if (openModal) {
-        setAddonModalOpen(addons.length > 0);
-      }
-
-      return addons;
-    } catch (error) {
-      console.error("Failed to fetch item addons:", error);
-      setSelectedItemAddons([]);
-      if (openModal) {
-        setAddonModalOpen(false);
-      }
-      return [];
-    } finally {
-      setLoadingAddons(false);
-    }
-  });
-
-  useMenuUpdates((payload) => {
-    if (payload.entity === "category") {
-      let nextSelectedCategory = selectedCategoryRef.current;
-
-      setCategories((prevCategories) => {
-        const nextState = applyCategoryChange({
-          categories: prevCategories,
-          selectedCategory: selectedCategoryRef.current,
-          change: payload,
-        });
-
-        nextSelectedCategory = nextState.selectedCategory;
-        return nextState.categories;
-      });
-
-      if (nextSelectedCategory !== selectedCategoryRef.current) {
-        skipNextSelectedCategoryFetchRef.current = true;
-        setSelectedCategory(nextSelectedCategory);
-        setItems([]);
-      }
-
-      return;
-    }
-
-    if (payload.entity === "item") {
-      const nextItemState = applyItemChange({
-        items: itemsRef.current,
-        selectedCategory: selectedCategoryRef.current,
-        selectedItem: selectedItemRef.current,
-        change: payload,
-      });
-
-      setItems(nextItemState.items);
-      setSelectedItem(nextItemState.selectedItem);
-
-      if (
-        selectedItemRef.current &&
-        Number(selectedItemRef.current.id) === Number(payload.entityId) &&
-        (payload.action === "deleted" ||
-          Number(payload.entityData?.is_active ?? 1) !== 1 ||
-          Number(payload.entityData?.is_deleted ?? 0) !== 0)
-      ) {
-        setAddonModalOpen(false);
-        setSelectedItemAddons([]);
-      }
-
-      return;
-    }
-
-    if (payload.entity === "addon") {
-      const nextAddonState = applyAddonChange({
-        addonCache: addonCacheRef.current,
-        selectedItem: selectedItemRef.current,
-        selectedItemAddons: selectedItemAddonsRef.current,
-        change: payload,
-      });
-
-      setAddonCache(nextAddonState.addonCache);
-      setSelectedItemAddons(nextAddonState.selectedItemAddons);
-    }
-  });
-
-  useEffect(() => {
-    void loadCategories();
-
-    const loadSettings = async () => {
+    const loadData = async () => {
       try {
-        const settings = await fetchRestaurantSettings();
-        setRestaurantSettings(settings);
+        const [cats, items] = await Promise.all([
+          fetchCategories(),
+          fetchPopularItems(4)
+        ]);
+        setCategories(cats);
+        setPopularItems(items);
       } catch (error) {
-        console.error("Failed to fetch restaurant settings", error);
+        console.error("Failed to fetch home data:", error);
       }
     };
-    loadSettings();
+    loadData();
   }, []);
-
-  useEffect(() => {
-    const accessToken = customerAuthStorage.getAccessToken();
-
-    if (!accessToken) {
-      return;
-    }
-
-    let isCancelled = false;
-
-    const loadCustomerProfile = async () => {
-      try {
-        const profile = await fetchCustomerProfile(accessToken);
-
-        if (!isCancelled) {
-          customerAuthStorage.updateCustomer(profile);
-          setCustomer(profile);
-        }
-      } catch (_error) {
-        customerAuthStorage.clearSession();
-        if (!isCancelled) {
-          setCustomer(null);
-        }
-      }
-    };
-
-    void loadCustomerProfile();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const checkoutStatus = params.get("checkout");
-    const sessionId = params.get("session_id");
-
-    if (!checkoutStatus) {
-      return;
-    }
-
-    const clearCheckoutParams = () => {
-      params.delete("checkout");
-      params.delete("session_id");
-      const nextSearch = params.toString();
-      window.history.replaceState(
-        {},
-        "",
-        `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`
-      );
-    };
-
-    if (checkoutStatus === "cancelled") {
-      setCheckoutResult({
-        status: "cancelled",
-        message: "Payment was cancelled. No online order was placed.",
-        order: null,
-      });
-      setCartOpen(true);
-      clearCheckoutParams();
-      return;
-    }
-
-    if (checkoutStatus !== "success" || !sessionId) {
-      clearCheckoutParams();
-      return;
-    }
-
-    const accessToken = customerAuthStorage.getAccessToken();
-
-    if (!accessToken) {
-      setCheckoutResult({
-        status: "error",
-        message: "Please sign in again to confirm your payment.",
-        order: null,
-      });
-      clearCheckoutParams();
-      return;
-    }
-
-    let isCancelled = false;
-
-    const confirmCheckout = async () => {
-      setCheckoutResult({
-        status: "processing",
-        message: "Verifying your Stripe payment...",
-        order: null,
-      });
-
-      try {
-        const result = await confirmCustomerCheckoutSession(sessionId, accessToken);
-
-        if (isCancelled) {
-          return;
-        }
-
-        const orderNumber = result?.order?.order_number;
-        setCheckoutResult({
-          status: "success",
-          message: orderNumber
-            ? `Payment successful. Order number: ${orderNumber}`
-            : "Payment successful. Your order has been placed.",
-          order: result?.order || null,
-        });
-        setCart([]);
-        setOrdersRefreshKey((prev) => prev + 1);
-      } catch (error) {
-        if (!isCancelled) {
-          setCheckoutResult({
-            status: "error",
-            message: error.message || "Payment succeeded, but confirmation failed.",
-            order: null,
-          });
-        }
-      } finally {
-        if (!isCancelled) {
-          clearCheckoutParams();
-        }
-      }
-    };
-
-    void confirmCheckout();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!selectedCategory) {
-      setItems([]);
-      return;
-    }
-
-    if (skipNextSelectedCategoryFetchRef.current) {
-      skipNextSelectedCategoryFetchRef.current = false;
-      return;
-    }
-
-    void loadItems(selectedCategory);
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    const accessToken = customerAuthStorage.getAccessToken();
-
-    if (!customer?.id || !accessToken) {
-      previousNotificationCountRef.current = 0;
-      hasLoadedNotificationSummaryRef.current = false;
-      setNotificationSummary({
-        unreadCount: 0,
-        notifications: [],
-      });
-      return;
-    }
-
-    let isCancelled = false;
-
-    const loadNotificationSummary = async () => {
-      try {
-        const summary = await fetchCustomerUnreadNotificationSummary(accessToken, 10);
-
-        if (!isCancelled) {
-          const nextUnreadCount = Number(summary?.unreadCount || 0);
-          const previousUnreadCount = previousNotificationCountRef.current;
-
-          if (
-            hasLoadedNotificationSummaryRef.current &&
-            nextUnreadCount > previousUnreadCount
-          ) {
-            startCustomerNotificationAlert();
-          }
-
-          previousNotificationCountRef.current = nextUnreadCount;
-          hasLoadedNotificationSummaryRef.current = true;
-          setNotificationSummary(summary);
-        }
-      } catch (_error) {
-        if (!isCancelled) {
-          previousNotificationCountRef.current = 0;
-          hasLoadedNotificationSummaryRef.current = true;
-          setNotificationSummary({
-            unreadCount: 0,
-            notifications: [],
-          });
-        }
-      }
-    };
-
-    void loadNotificationSummary();
-
-    return () => {
-      isCancelled = true;
-      stopCustomerNotificationAlert();
-    };
-  }, [customer?.id, notificationsRefreshKey]);
-
-  useCustomerRealtimeUpdates({
-    customer,
-    onOrderUpdate: () => {
-      setOrdersRefreshKey((prev) => prev + 1);
-    },
-    onNotificationUpdate: () => {
-      setNotificationsRefreshKey((prev) => prev + 1);
-    },
-  });
-
-  const buildCartItem = (item, selectedAddons = []) => {
-    const addonIds = selectedAddons.map((addon) => addon.id).sort((a, b) => a - b);
-    const cartKey = `${item.id}:${addonIds.join("-") || "base"}`;
-    const addonTotal = selectedAddons.reduce(
-      (sum, addon) => sum + Number(addon.addon_price || 0),
-      0
-    );
-
-    return {
-      ...item,
-      cart_key: cartKey,
-      selected_addons: selectedAddons,
-      addon_total: addonTotal,
-      qty: 1,
-    };
-  };
-
-  const addConfiguredItemToCart = (item, selectedAddons = []) => {
-    const cartItem = buildCartItem(item, selectedAddons);
-
-    setCart((prev) => {
-      const existing = prev.find((entry) => entry.cart_key === cartItem.cart_key);
-      if (existing) {
-        return prev.map((entry) =>
-          entry.cart_key === cartItem.cart_key
-            ? { ...entry, qty: entry.qty + 1 }
-            : entry
-        );
-      }
-      return [...prev, cartItem];
-    });
-  };
-
-  const closeAddonModal = () => {
-    setAddonModalOpen(false);
-    setSelectedItem(null);
-    setSelectedItemAddons([]);
-    setLoadingAddons(false);
-  };
-
-  const handleAddonConfirm = (selectedAddons) => {
-    if (selectedItem) {
-      addConfiguredItemToCart(selectedItem, selectedAddons);
-    }
-    closeAddonModal();
-  };
-
-  const openAddonsForItem = async (item) => {
-    if (item.cart_key) {
-      return;
-    }
-
-    setSelectedItem(item);
-
-    const addons = await loadAddonsForItem(item, {
-      useCache: true,
-      openModal: false,
-    });
-
-    if (addons.length > 0) {
-      setAddonModalOpen(true);
-    } else {
-      closeAddonModal();
-    }
-  };
-
-  const addToCart = (item) => {
-    if (item.cart_key) {
-      addConfiguredItemToCart(item, item.selected_addons || []);
-      return;
-    }
-
-    addConfiguredItemToCart(item, []);
-  };
-
-  const removeFromCart = (itemId, cartKey = null) => {
-    setCart((prev) => {
-      const existing = cartKey
-        ? prev.find((entry) => entry.cart_key === cartKey)
-        : [...prev].reverse().find((entry) => entry.id === itemId);
-
-      if (!existing) {
-        return prev;
-      }
-
-      if (existing.qty > 1) {
-        return prev.map((entry) =>
-          entry.cart_key === existing.cart_key
-            ? { ...entry, qty: entry.qty - 1 }
-            : entry
-        );
-      }
-
-      return prev.filter((entry) => entry.cart_key !== existing.cart_key);
-    });
-  };
-
-  const cartCount = cart.reduce((sum, entry) => sum + entry.qty, 0);
-  const shouldShowCheckoutResult = checkoutResult.status !== "idle";
-  const checkoutResultIsBusy = checkoutResult.status === "processing";
-  const checkoutResultIsSuccess = checkoutResult.status === "success";
-
   return (
-    <div className="customer-shell">
-      {shouldShowCheckoutResult ? (
-        <div className="fixed inset-0 z-[500] grid place-items-center bg-black/70 px-4 backdrop-blur-sm">
-          <div className="w-[min(460px,100%)] rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,#1a1a2e_0%,#0f0c29_100%)] p-6 text-center text-white shadow-[0_28px_90px_rgba(0,0,0,0.55)]">
-            <div
-              className={`mx-auto grid h-16 w-16 place-items-center rounded-2xl text-2xl font-black ${
-                checkoutResult.status === "success"
-                  ? "bg-green-500/20 text-green-200"
-                  : checkoutResult.status === "processing"
-                    ? "bg-amber-500/20 text-amber-200"
-                    : "bg-red-500/20 text-red-200"
-              }`}
-            >
-              {checkoutResult.status === "success"
-                ? "OK"
-                : checkoutResult.status === "processing"
-                  ? "..."
-                  : "!"}
+    <div className="flex flex-col">
+      <Hero />
+      
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        
+        {/* Categories Section */}
+        <section className="mb-24">
+          <div className="flex items-center gap-6 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {categories.map((cat) => (
+              <Link 
+                key={cat.id} 
+                to="/menu"
+                state={{ categoryId: cat.id }}
+                className="group flex flex-col items-center gap-3 min-w-[100px]"
+              >
+                <div className="flex h-[80px] w-[80px] items-center justify-center rounded-2xl bg-theme-surface shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:-translate-y-1 overflow-hidden p-2">
+                  {getImageUrl(cat, "category_image") ? (
+                    <img 
+                      src={getImageUrl(cat, "category_image")} 
+                      alt={cat.category_name} 
+                      className="h-full w-full object-contain mix-blend-multiply" 
+                    />
+                  ) : (
+                    <span className="text-4xl">🍽️</span>
+                  )}
+                </div>
+                <span className="text-sm font-semibold text-theme-text text-center">
+                  {cat.category_name}
+                </span>
+              </Link>
+            ))}
+            <Link to="/menu" className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-theme-accent text-theme-inverse-text ml-4 shrink-0 transition-transform hover:scale-110 shadow-warm">
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Captivating Culinary Favorites */}
+        <section className="mb-32 flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-20">
+          <div className="relative flex-1">
+            <div className="relative z-10 aspect-[4/5] w-[80%] overflow-hidden rounded-3xl shadow-premium">
+              <img 
+                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1999&auto=format&fit=crop" 
+                alt="Burger" 
+                className="h-full w-full object-cover"
+              />
             </div>
-            <h2 className="mb-2 mt-5 text-2xl font-extrabold">
-              {checkoutResult.status === "success"
-                ? "Payment Successful"
-                : checkoutResult.status === "processing"
-                  ? "Confirming Payment"
-                  : checkoutResult.status === "cancelled"
-                    ? "Payment Cancelled"
-                    : "Payment Not Completed"}
+            <div className="absolute -bottom-10 -right-4 z-20 aspect-square w-[55%] overflow-hidden rounded-3xl border-8 border-[#F9F6F0] shadow-xl">
+              <img 
+                src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974&auto=format&fit=crop" 
+                alt="Grill" 
+                className="h-full w-full object-cover"
+              />
+            </div>
+          </div>
+          
+          <div className="flex-1 mt-12 lg:mt-0">
+            <h2 className="mb-4 font-serif text-4xl font-bold leading-tight text-theme-text md:text-5xl">
+              Captivating Culinary <br />
+              <span className="text-theme-accent">Favorites.</span>
             </h2>
-            <p className="mx-auto mb-5 max-w-[34ch] text-sm leading-6 text-white/65">
-              {checkoutResult.message}
+            <p className="mb-8 text-theme-text-muted leading-relaxed max-w-md text-sm md:text-base">
+              Experience the perfect blend of artisanal ingredients and passionate preparation. Our culinary team crafts every dish to deliver an unforgettable taste journey.
             </p>
-            {checkoutResultIsBusy ? (
-              <div className="mx-auto h-9 w-9 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {checkoutResultIsSuccess ? (
-                  <button
-                    type="button"
-                    className="rounded-2xl border-0 bg-green-500 px-4 py-3 text-sm font-extrabold text-white"
-                    onClick={() => {
-                      setCheckoutResult({ status: "idle", message: "", order: null });
-                      setCustomerDrawerTab("orders");
-                      setCustomerDrawerOpen(true);
-                    }}
-                  >
-                    View Order
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-extrabold text-white"
-                  onClick={() => {
-                    setCheckoutResult({ status: "idle", message: "", order: null });
-                  }}
-                >
-                  {checkoutResultIsSuccess ? "Continue" : "Back to Cart"}
-                </button>
+            <div className="flex items-center gap-6">
+              <Link to="/menu" className="customer-primary-button inline-flex items-center gap-2">
+                Order Now <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link to="/about" className="text-sm font-bold text-theme-accent hover:text-theme-accent underline underline-offset-4 decoration-2 decoration-green-600/30 transition-colors">
+                About Bagel Cafe
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Best Selling Items */}
+        <section className="mb-32">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl font-bold text-theme-text md:text-4xl">
+              Best Selling <span className="text-theme-accent">Items</span>
+            </h2>
+            <p className="mt-4 mx-auto max-w-xl text-sm text-theme-text-muted">
+              Discover the absolute favorites chosen by our customers every day. Fresh, delicious, and made to order.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {popularItems.length > 0 ? popularItems.map((item) => {
+              const hasDiscount = item.discount_price && item.discount_price < item.price;
+              
+              return (
+                <div key={item.id} className="group flex flex-col rounded-3xl bg-theme-surface p-4 shadow-sm transition-shadow hover:shadow-premium border border-theme-border relative">
+                  {hasDiscount && (
+                    <span className="absolute top-6 left-6 z-10 rounded-full bg-red-600 px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                      Sale
+                    </span>
+                  )}
+                  <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-theme-bg mb-4">
+                    {getImageUrl(item, "item_image") ? (
+                      <img src={getImageUrl(item, "item_image")} alt={item.item_name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-4xl">☕</div>
+                    )}
+                  </div>
+                  <h3 className="font-sans text-sm font-bold text-theme-text mb-1">{item.item_name}</h3>
+                  <div className="flex text-theme-accent text-xs mb-3">
+                    ★★★★★
+                  </div>
+                  <div className="mt-auto flex items-end justify-between">
+                    <div className="flex flex-col">
+                      {hasDiscount ? (
+                        <>
+                          <span className="font-sans text-[11px] text-theme-text-muted line-through">
+                            ${Number(item.price).toFixed(2)}
+                          </span>
+                          <span className="font-sans text-sm font-bold text-theme-accent">
+                            ${Number(item.discount_price).toFixed(2)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="font-sans text-sm font-bold text-theme-accent">
+                          ${Number(item.price).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                    <Link to="/menu" className="rounded-full bg-theme-accent px-3 py-1 font-sans text-xs font-bold text-theme-inverse-text transition-transform hover:scale-105 shadow-sm">
+                      View
+                    </Link>
+                  </div>
+                </div>
+              );
+            }) : (
+              <div className="col-span-4 py-12 text-center text-theme-text-muted">
+                Loading popular items...
               </div>
             )}
           </div>
-        </div>
-      ) : null}
-      <Header
-        cartCount={cartCount}
-        customer={customer}
-        notificationCount={notificationSummary.unreadCount}
-        onCustomerClick={() => {
-          setCartOpen(false);
-          setCustomerDrawerTab("profile");
-          setCustomerDrawerOpen(true);
-        }}
-        onNotificationClick={() => {
-          setCartOpen(false);
-          setCustomerDrawerTab("notifications");
-          stopCustomerNotificationAlert();
-          setCustomerDrawerOpen(true);
-        }}
-        onCartClick={() => {
-          setCustomerDrawerOpen(false);
-          setCartOpen(true);
-        }}
-      />
-      <Hero />
-      <div id="menu-section" className="scroll-mt-24 pb-16">
-        {!selectedCategory ? (
-          <CategoryGrid
-            categories={categories}
-            onSelect={setSelectedCategory}
-            loading={loadingCategories}
-          />
-        ) : (
-          <>
-            <div className="flex items-center justify-between px-4 pt-5 sm:px-6">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                className="flex items-center gap-2 rounded-xl bg-white/5 px-4 py-2 font-sans text-sm font-semibold text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                ← Back to Categories
-              </button>
-            </div>
-            <CategoryBar
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelect={setSelectedCategory}
-              loading={loadingCategories}
-            />
-            <ItemGrid
-              items={items}
-              loading={loadingItems}
-              onAddToCart={addToCart}
-              onOpenAddons={openAddonsForItem}
-              cart={cart}
-              onRemoveFromCart={removeFromCart}
-              sentinelRef={sentinelRef}
-              isFetchingMore={isFetchingMore}
-            />
-          </>
-        )}
+        </section>
       </div>
-      <About />
-      <Gallery />
-      <Testimonials />
-      <Footer />
-      <Suspense fallback={null}>
-        {cartOpen ? (
-          <CartDrawer
-            cart={cart}
-            customer={customer}
-            restaurantSettings={restaurantSettings}
-            onClose={() => setCartOpen(false)}
-            onAdd={addToCart}
-            onRemove={removeFromCart}
-            onClearCart={() => setCart([])}
-            onRequireSignIn={() => {
-              setCartOpen(false);
-              setCustomerDrawerTab("profile");
-              setCustomerDrawerOpen(true);
-            }}
-            onOrderPlaced={() => {
-              setOrdersRefreshKey((prev) => prev + 1);
-              setCartOpen(false);
-              setCustomerDrawerTab("orders");
-              setCustomerDrawerOpen(true);
-            }}
-          />
-        ) : null}
-      </Suspense>
-      <Suspense fallback={null}>
-        <CustomerDrawer
-          open={customerDrawerOpen}
-          onClose={() => setCustomerDrawerOpen(false)}
-          customer={customer}
-          onCustomerChange={setCustomer}
-          initialTab={customerDrawerTab}
-          ordersRefreshKey={ordersRefreshKey}
-          notificationsRefreshKey={notificationsRefreshKey}
-          notificationSummary={notificationSummary}
-          onNotificationSummaryChange={setNotificationSummary}
-        />
-      </Suspense>
-      <Suspense fallback={null}>
-        {addonModalOpen && selectedItem ? (
-          <AddonModal
-            item={selectedItem}
-            addons={selectedItemAddons}
-            loading={loadingAddons}
-            onClose={closeAddonModal}
-            onConfirm={handleAddonConfirm}
-          />
-        ) : null}
-      </Suspense>
+
+      {/* Choice of Customers */}
+      <section className="bg-theme-surface/50 py-24">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-16 lg:flex-row lg:items-center">
+            <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2">
+              {[
+                { title: "Warm & Enjoy", desc: "Always served at the perfect temperature.", icon: "🍲" },
+                { title: "Savour & Replay", desc: "Flavors that bring you back for more.", icon: "🍽️" },
+                { title: "Delivery Services", desc: "Fast and reliable to your doorstep.", icon: "🛵" },
+                { title: "Organic Food", desc: "Sourced from the best local farms.", icon: "🥗" },
+              ].map((feature, i) => (
+                <div key={i} className="rounded-2xl bg-theme-surface p-6 shadow-sm border border-theme-border transition-transform hover:-translate-y-1">
+                  <div className="mb-4 text-3xl">{feature.icon}</div>
+                  <h4 className="mb-2 font-sans text-sm font-bold text-theme-text">{feature.title}</h4>
+                  <p className="text-xs leading-relaxed text-theme-text-muted">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+            
+            <div className="flex-1 lg:pl-12">
+              <h2 className="mb-4 font-serif text-3xl font-bold leading-tight text-theme-text md:text-4xl">
+                The Choice of <br />
+                <span className="text-theme-accent">Customers</span>
+              </h2>
+              <p className="mb-8 text-theme-text-muted leading-relaxed text-sm md:text-base">
+                We take pride in providing an exceptional dining experience. From our carefully selected organic ingredients to our rapid delivery service, every aspect is designed with your satisfaction in mind.
+              </p>
+              <Link to="/about" className="inline-flex items-center gap-2 rounded-xl bg-theme-accent px-6 py-3 text-sm font-bold text-theme-inverse-text shadow-warm transition-transform hover:-translate-y-0.5">
+                View More <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
-
-export default Home;

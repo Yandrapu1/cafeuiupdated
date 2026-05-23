@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function About() {
   return (
-    <section id="about-section" className="relative bg-cafe-bg py-24 md:py-32">
+    <section id="about-section" className="relative bg-theme-bg py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           
@@ -36,7 +36,7 @@ export default function About() {
             </motion.div>
             
             {/* Decorative element */}
-            <div className="absolute -left-8 -top-8 -z-10 h-64 w-64 rounded-full bg-cafe-gold/5 blur-3xl" />
+            <div className="absolute -left-8 -top-8 -z-10 h-64 w-64 rounded-full bg-theme-accent/5 blur-3xl" />
             <div className="absolute -bottom-12 -right-12 -z-10 h-64 w-64 rounded-full bg-cafe-coffee/20 blur-3xl" />
           </div>
 
@@ -48,12 +48,12 @@ export default function About() {
             transition={{ duration: 0.8 }}
             className="lg:pl-10"
           >
-            <h2 className="mb-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-cafe-gold">
+            <h2 className="mb-4 font-sans text-sm font-bold uppercase tracking-[0.2em] text-theme-accent">
               Our Heritage
             </h2>
             <h3 className="mb-6 font-serif text-4xl font-bold leading-tight text-white md:text-5xl">
               Crafting Moments <br />
-              <span className="italic text-cafe-cream/80">Since 2010</span>
+              <span className="italic text-theme-text/80">Since 2010</span>
             </h3>
             
             <p className="mb-6 font-sans text-lg font-light leading-relaxed text-white/70">
@@ -66,11 +66,11 @@ export default function About() {
 
             <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
               <div>
-                <p className="font-serif text-4xl font-bold text-cafe-gold">15+</p>
+                <p className="font-serif text-4xl font-bold text-theme-accent">15+</p>
                 <p className="mt-2 font-sans text-sm uppercase tracking-wider text-white/50">Years of Excellence</p>
               </div>
               <div>
-                <p className="font-serif text-4xl font-bold text-cafe-gold">100%</p>
+                <p className="font-serif text-4xl font-bold text-theme-accent">100%</p>
                 <p className="mt-2 font-sans text-sm uppercase tracking-wider text-white/50">Handcrafted Daily</p>
               </div>
             </div>

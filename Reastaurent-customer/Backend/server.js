@@ -12,6 +12,7 @@ const customerOrderRoutes = require("./orders/orderRoutes");
 const customerNotificationRoutes = require("./notifications/notificationRoutes");
 const paymentRoutes = require("./payments/paymentRoutes");
 const restaurantRoutes = require("./restaurant/restaurantRoutes");
+const galleryRoutes = require("./gallery/galleryRoutes");
 const {
   createMenuUpdatesGateway,
 } = require("./realtime/menuUpdatesGateway");
@@ -65,6 +66,7 @@ app.use("/api/orders", customerOrderRoutes);
 app.use("/api/notifications", customerNotificationRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/restaurant", restaurantRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 app.get("/health", async (_req, res) => {
   try {

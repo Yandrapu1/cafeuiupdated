@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
+  const navigate = useNavigate();
   return (
     <section className="relative h-screen min-h-[600px] w-full overflow-hidden flex items-center justify-center">
       {/* Background Image */}
@@ -12,7 +14,7 @@ export default function Hero() {
         }}
       >
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#110e0d]/80 via-[#110e0d]/50 to-cafe-bg" />
+        <div className="absolute inset-0 bg-theme-border" />
       </div>
 
       <div className="relative z-10 w-full max-w-[1200px] px-6 text-center">
@@ -21,12 +23,12 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <span className="mb-4 inline-block font-sans text-sm font-bold uppercase tracking-[0.2em] text-cafe-gold">
+          <span className="mb-4 inline-block font-sans text-sm font-bold uppercase tracking-[0.2em] text-theme-accent">
             Premium Roasters & Bakers
           </span>
           <h1 className="mb-6 font-serif text-5xl font-bold leading-tight text-white sm:text-6xl md:text-7xl lg:text-8xl">
             The Art of <br />
-            <span className="italic text-cafe-cream/90">Coffee & Bagels</span>
+            <span className="italic text-theme-text/90">Coffee & Bagels</span>
           </h1>
         </motion.div>
 
@@ -46,15 +48,15 @@ export default function Hero() {
           className="flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
           <button 
-            onClick={() => document.getElementById("menu-section")?.scrollIntoView({ behavior: "smooth" })}
-            className="group flex items-center gap-2 rounded-full bg-cafe-gold px-8 py-4 font-sans text-sm font-bold uppercase tracking-wider text-[#110e0d] transition-all duration-300 hover:bg-white hover:shadow-[0_0_30px_rgba(197,168,128,0.4)]"
+            onClick={() => navigate("/menu")}
+            className="group flex items-center gap-2 rounded-full bg-theme-accent px-8 py-4 font-sans text-sm font-bold uppercase tracking-wider text-theme-inverse-text transition-all duration-300 hover:bg-theme-surface hover:shadow-[0_0_30px_rgba(245,184,0,0.4)]"
           >
             Explore Menu
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </button>
           <button 
-            onClick={() => document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" })}
-            className="rounded-full border border-white/20 bg-white/5 px-8 py-4 font-sans text-sm font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/10 hover:text-cafe-gold"
+            onClick={() => navigate("/about")}
+            className="rounded-full border border-white/20 bg-theme-surface px-8 py-4 font-sans text-sm font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-all duration-300 hover:bg-theme-surface hover:text-theme-accent"
           >
             Our Story
           </button>

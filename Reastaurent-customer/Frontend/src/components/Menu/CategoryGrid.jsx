@@ -33,7 +33,7 @@ function CategoryGrid({ categories, onSelect, loading }) {
           <button
             key={cat.id}
             onClick={() => onSelect(cat.id)}
-            className="group relative flex h-[220px] w-full flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#1c1917] p-0 text-left transition-all duration-500 hover:-translate-y-2 hover:border-cafe-gold/30 hover:shadow-premium"
+            className="group relative flex h-[220px] w-full flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[#1c1917] p-0 text-left transition-all duration-500 hover:-translate-y-2 hover:border-theme-accent/30 hover:shadow-premium"
           >
             {getImageUrl(cat, "category_image") ? (
               <img
@@ -44,16 +44,16 @@ function CategoryGrid({ categories, onSelect, loading }) {
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
             ) : (
-              <div className="absolute inset-0 grid place-items-center bg-black/40 text-6xl">
+              <div className="absolute inset-0 grid place-items-center bg-theme-border text-6xl">
                 ☕
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             <div className="relative mt-auto p-6">
-              <h3 className="m-0 font-serif text-2xl font-bold tracking-wide text-white drop-shadow-md transition-colors duration-300 group-hover:text-cafe-gold">
+              <h3 className="m-0 font-serif text-2xl font-bold tracking-wide text-white drop-shadow-md transition-colors duration-300 group-hover:text-theme-accent">
                 {cat.category_name}
               </h3>
-              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 font-sans text-xs font-semibold tracking-wider text-white backdrop-blur-md transition-colors duration-300 group-hover:bg-cafe-gold group-hover:text-[#110e0d]">
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-theme-surface px-4 py-1.5 font-sans text-xs font-semibold tracking-wider text-white backdrop-blur-md transition-colors duration-300 group-hover:bg-theme-accent group-hover:text-theme-inverse-text">
                 <span>VIEW ITEMS</span>
                 <span className="text-lg leading-none">→</span>
               </div>

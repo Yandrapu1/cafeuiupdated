@@ -5,15 +5,15 @@ export default {
     extend: {
       colors: {
         cafe: {
-          bg: "#110e0d", // Dark roasted coffee almost black
-          panel: "rgba(255, 255, 255, 0.03)",
-          panelStrong: "rgba(255, 255, 255, 0.08)",
-          border: "rgba(255, 255, 255, 0.08)",
-          muted: "rgba(255, 255, 255, 0.55)",
-          cream: "#F9F6F0",
+          bg: "#F9F6F0", // Light cream background
+          panel: "rgba(0, 0, 0, 0.03)",
+          panelStrong: "rgba(0, 0, 0, 0.08)",
+          border: "rgba(0, 0, 0, 0.08)",
+          muted: "rgba(0, 0, 0, 0.55)",
+          cream: "#110e0d", // Dark text
           beige: "#EBE3D5",
           coffee: "#5C4033",
-          gold: "#C5A880",
+          gold: "#F5B800", // Vibrant yellow/gold from reference
           brown: {
             50: "#fdf8f6",
             100: "#f2e8e5",
@@ -33,9 +33,9 @@ export default {
         serif: ["Playfair Display", "serif"],
       },
       boxShadow: {
-        glow: "0 12px 40px rgba(0,0,0,0.3)",
-        warm: "0 10px 30px rgba(197,168,128,0.15)",
-        premium: "0 20px 40px rgba(0,0,0,0.4)",
+        glow: "0 12px 40px rgba(0,0,0,0.1)",
+        warm: "0 10px 30px rgba(245, 184, 0, 0.15)",
+        premium: "0 20px 40px rgba(0,0,0,0.1)",
       },
       animation: {
         "customer-overlay-in": "customerOverlayFadeIn 220ms ease-out",

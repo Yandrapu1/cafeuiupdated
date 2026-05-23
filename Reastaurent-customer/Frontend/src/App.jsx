@@ -34,7 +34,17 @@ class ErrorBoundary extends React.Component {
 }
 
 // Lazy load pages
+const Layout = lazy(() => import("./components/Layout/Layout"));
 const Home = lazy(() => import("./Pages/Home/Home"));
+const MenuPage = lazy(() => import("./Pages/Menu/MenuPage"));
+const AboutPage = lazy(() => import("./Pages/About/AboutPage"));
+const GalleryPage = lazy(() => import("./Pages/Gallery/GalleryPage"));
+const ContactPage = lazy(() => import("./Pages/Contact/ContactPage"));
+const LoginPage = lazy(() => import("./Pages/Auth/LoginPage"));
+const RegisterPage = lazy(() => import("./Pages/Auth/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./Pages/Auth/ForgotPasswordPage"));
+const ProfilePage = lazy(() => import("./Pages/Profile/ProfilePage"));
+const CheckoutPage = lazy(() => import("./Pages/Checkout/CheckoutPage"));
 const Office = lazy(() => import("./Pages/Office/Office"));
 const OrderDetails = lazy(() => import("./Pages/OrderDetails/OrderDetails"));
 
@@ -58,9 +68,25 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <ErrorBoundary>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/orders/:id" element={<OrderDetails />} />
-            <Route path="/office" element={<Office />} />
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="menu" element={<MenuPage />} />
+              <Route path="about" element={<AboutPage />} />
+              <Route path="gallery" element={<GalleryPage />} />
+              <Route path="contact" element={<ContactPage />} />
+              
+              {/* Auth Flow */}
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
+              <Route path="forgot-password" element={<ForgotPasswordPage />} />
+              
+              {/* Profile & Checkout */}
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="checkout" element={<CheckoutPage />} />
+              
+              <Route path="orders/:id" element={<OrderDetails />} />
+              <Route path="office" element={<Office />} />
+            </Route>
             {/* Add more routes here as needed */}
           </Routes>
         </ErrorBoundary>
