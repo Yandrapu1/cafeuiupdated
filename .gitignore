@@ -1,0 +1,30 @@
+node_modules/
+Backend/node_modules/
+Frontend/node_modules/
+Reastaurent-Admin/Backend/node_modules/
+Reastaurent-Admin/Frontend/node_modules/
+Reastaurent-customer/Backend/node_modules/
+Reastaurent-customer/Frontend/node_modules/
+# Reastaurent-Admin/Frontend/.env
+# Reastaurent-customer/Frontend/.env
+
+dist/
+build/
+.vercel/
+
+
+VITE_API_BASE_URL=https://cafe-customer-backend.onrender.com/api
+VITE_MENU_UPDATES_WS_URL=wss://cafe-customer-backend.onrender.com/ws
+
+
+
+VITE_BACKEND_BASE_URL=https://cafe-backend-pdkr.onrender.com
+
+
+Customer frontend project cafe-hby1
+
+
+
+
+VITE_API_BASE_URL=https://cafe-customer-backend.onrender.com/api
+VITE_MENU_UPDATES_WS_URL=wss://cafe-customer-backend.onrender.com/ws
