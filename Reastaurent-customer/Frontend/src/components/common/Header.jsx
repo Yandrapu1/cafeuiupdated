@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { ShoppingCart, Bell, User, Menu, X } from "lucide-react";
+import { ShoppingCart, Bell, User, Menu, X, LogOut, Settings, ShoppingBag, Info } from "lucide-react";
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import { NavLink, Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import BMLogo from "../../assets/Cafe_logo.jpeg";
-
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -15,11 +15,14 @@ function Header({
   onCartClick,
   onCustomerClick,
   onNotificationClick,
+  onDropdownClick,
+  onLogoutClick,
   customer,
   notificationCount = 0,
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,33 +63,99 @@ function Header({
       )}
     >
       {/* Logo */}
-     <Link to="/" className="flex items-center gap-3">
-  <img
-    src={BMLogo}
-    alt="Bagel Master Logo"
-    className="h-16 w-16 rounded-full "
-  />
-</Link>
+      <Link to="/" className="flex items-center gap-3">
+        <img
+          src={BMLogo}
+          alt="Bagel Master Logo"
+          className="h-16 w-16 rounded-full "
+        />
+      </Link>
 
       {/* Center Nav (Hidden on Mobile) */}
       <nav className="hidden md:flex items-center gap-8 font-sans text-sm font-semibold uppercase tracking-widest text-white/80">
         <NavLink to="/" className={navLinkClass}>Home</NavLink>
         <NavLink to="/menu" className={navLinkClass}>Menu</NavLink>
-        <NavLink to="/about" className={navLinkClass}>Events</NavLink>
-        <NavLink to="/gallery" className={navLinkClass}>Rewards</NavLink>
+        <NavLink to="/about" className={navLinkClass}>About</NavLink>
+        <NavLink to="/events" className={navLinkClass}>Events</NavLink>
+        {/* <NavLink to="/gallery" className={navLinkClass}>Rewards</NavLink> */}
         <NavLink to="/contact" className={navLinkClass}>Contact Us</NavLink>
       </nav>
 
       {/* Actions */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* User */}
-        <button onClick={onCustomerClick} className={iconButtonClass}>
-          {customer?.name ? (
-            <span className="font-sans text-lg font-bold">{customer.name.charAt(0).toUpperCase()}</span>
-          ) : (
-            <User className="h-5 w-5" />
-          )}
-        </button>
+        {/* User / Dropdown */}
+        <div className="relative">
+          <button 
+            onClick={() => {
+              if (customer) setDropdownOpen(!dropdownOpen);
+              else onCustomerClick();
+            }} 
+            className={iconButtonClass}
+          >
+            {customer?.name ? (
+              <span className="font-sans text-lg font-bold">{customer.name.charAt(0).toUpperCase()}</span>
+            ) : (
+              <User className="h-5 w-5" />
+            )}
+          </button>
+          
+          <AnimatePresence>
+            {dropdownOpen && customer && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 top-full mt-3 w-64 rounded-2xl bg-[#110e0d] border border-white/10 shadow-2xl overflow-hidden z-50 flex flex-col"
+                >
+                  <div className="p-4 border-b border-white/5 bg-white/[0.02]">
+                    <p className="text-sm font-bold text-white truncate">{customer.name}</p>
+                    <p className="text-xs text-white/50 truncate mt-0.5">{customer.email}</p>
+                  </div>
+                  
+                  <div className="flex flex-col py-2">
+                    {[
+                      { id: 'profile', label: 'My Profile', icon: User },
+                      { id: 'orders', label: 'My Orders', icon: ShoppingBag },
+                      { id: 'settings', label: 'Settings', icon: Settings },
+                      { id: 'support', label: 'Support', icon: Info },
+                    ].map(item => {
+                      const Icon = item.icon;
+                      return (
+                        <button 
+                          key={item.id}
+                          onClick={() => {
+                            setDropdownOpen(false);
+                            onDropdownClick?.(item.id);
+                          }}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-white/70 hover:text-white hover:bg-white/[0.04] transition-colors text-left"
+                        >
+                          <Icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  
+                  <div className="border-t border-white/5 py-2">
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        onLogoutClick?.();
+                      }}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors text-left w-full"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Notifications */}
         <button onClick={onNotificationClick} className={iconButtonClass}>
@@ -121,7 +190,8 @@ function Header({
             <NavLink to="/" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>Home</NavLink>
             <NavLink to="/menu" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>Menu</NavLink>
             <NavLink to="/about" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>About Us</NavLink>
-            <NavLink to="/gallery" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>Gallery</NavLink>
+            <NavLink to="/events" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>Events</NavLink>
+            {/* <NavLink to="/gallery" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>Gallery</NavLink> */}
             <NavLink to="/contact" onClick={() => setMobileMenuOpen(false)} className={navLinkClass}>Contact Us</NavLink>
           </nav>
         </div>

@@ -25,9 +25,10 @@ import {
   stopCustomerNotificationAlert,
 } from "../../Utils/notificationSound";
 
-const ProductModal = lazy(() => import("../../components/Menu/ProductModal"));
-const CustomerDrawer = lazy(() => import("../../components/customer/CustomerDrawer"));
-const NotificationDrawer = lazy(() => import("../../components/customer/NotificationDrawer"));
+const ProductModal = lazy(() => import("../Menu/ProductModal"));
+const AuthModal = lazy(() => import("../customer/AuthModal"));
+const CustomerDashboardModal = lazy(() => import("../customer/CustomerDashboardModal"));
+const NotificationDrawer = lazy(() => import("../customer/NotificationDrawer"));
 
 function Home() {
   const [categories, setCategories] = useState([]);
@@ -44,9 +45,12 @@ function Home() {
   const [selectedItemAddons, setSelectedItemAddons] = useState([]);
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [loadingAddons, setLoadingAddons] = useState(false);
-  const [customerDrawerOpen, setCustomerDrawerOpen] = useState(false);
+  
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [dashboardModalOpen, setDashboardModalOpen] = useState(false);
+  const [dashboardTab, setDashboardTab] = useState("profile");
+  
   const [customer, setCustomer] = useState(customerAuthStorage.getCustomer());
-  const [customerDrawerTab, setCustomerDrawerTab] = useState("profile");
   const [ordersRefreshKey, setOrdersRefreshKey] = useState(0);
   const [notificationsRefreshKey, setNotificationsRefreshKey] = useState(0);
   const [notificationSummary, setNotificationSummary] = useState({
@@ -382,7 +386,7 @@ function Home() {
         message: "Payment was cancelled. No online order was placed.",
         order: null,
       });
-      setCartOpen(true);
+      // setCartOpen(true);
       clearCheckoutParams();
       return;
     }
@@ -670,8 +674,8 @@ function Home() {
                     className="rounded-2xl border-0 bg-green-500 px-4 py-3 text-sm font-extrabold text-white"
                     onClick={() => {
                       setCheckoutResult({ status: "idle", message: "", order: null });
-                      setCustomerDrawerTab("orders");
-                      setCustomerDrawerOpen(true);
+                      setDashboardTab("orders");
+                      setDashboardModalOpen(true);
                     }}
                   >
                     View Order
@@ -696,8 +700,25 @@ function Home() {
         customer={customer}
         notificationCount={notificationSummary.unreadCount}
         onCustomerClick={() => {
-          setCustomerDrawerTab("profile");
-          setCustomerDrawerOpen(true);
+          if (!customer) {
+            setAuthModalOpen(true);
+          } else {
+            setDashboardTab("profile");
+            setDashboardModalOpen(true);
+          }
+        }}
+        onDropdownClick={(tab) => {
+          setDashboardTab(tab);
+          setDashboardModalOpen(true);
+        }}
+        onLogoutClick={async () => {
+          try {
+            const accessToken = customerAuthStorage.getAccessToken();
+            if (accessToken) await import("../../services/customerAuthApi").then(m => m.logoutCustomer(accessToken));
+          } catch (e) {} finally {
+            customerAuthStorage.clearSession();
+            setCustomer(null);
+          }
         }}
         onNotificationClick={() => {
           stopCustomerNotificationAlert();
@@ -726,9 +747,9 @@ function Home() {
             restaurantSettings,
             clearCart: () => setCart([]),
             setOrdersRefreshKey,
-            openCustomerDrawer: (tab) => {
-              setCustomerDrawerTab(tab);
-              setCustomerDrawerOpen(true);
+            openCustomerDashboard: (tab) => {
+              setDashboardTab(tab);
+              setDashboardModalOpen(true);
             }
           }}
         />
@@ -743,16 +764,29 @@ function Home() {
         />
       </Suspense>
       <Suspense fallback={null}>
-        <CustomerDrawer
-          open={customerDrawerOpen}
-          onClose={() => setCustomerDrawerOpen(false)}
+        <AuthModal
+          open={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          onAuthenticated={(customerData) => {
+            setCustomer(customerData);
+            import("../../services/customerProfileApi").then(async (m) => {
+              try {
+                const fresh = await m.fetchCustomerProfile(customerAuthStorage.getAccessToken());
+                customerAuthStorage.updateCustomer(fresh);
+                setCustomer(fresh);
+              } catch(e) {}
+            });
+          }}
+        />
+      </Suspense>
+      <Suspense fallback={null}>
+        <CustomerDashboardModal
+          open={dashboardModalOpen}
+          onClose={() => setDashboardModalOpen(false)}
           customer={customer}
           onCustomerChange={setCustomer}
-          initialTab={customerDrawerTab}
+          initialTab={dashboardTab}
           ordersRefreshKey={ordersRefreshKey}
-          notificationsRefreshKey={notificationsRefreshKey}
-          notificationSummary={notificationSummary}
-          onNotificationSummaryChange={setNotificationSummary}
         />
       </Suspense>
       <Suspense fallback={null}>

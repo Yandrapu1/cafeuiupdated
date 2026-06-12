@@ -127,18 +127,18 @@ export default function NotificationDrawer({
 
   return (
     <>
-      <div onClick={onClose} className="customer-drawer-overlay" />
-      <div className="customer-drawer-panel flex flex-col !z-[221]">
-        <div className="flex items-center justify-between border-b border-white/5 pb-5 px-5 pt-6 sm:px-6">
+      <div onClick={onClose} className="fixed inset-0 z-[220] bg-black/60 backdrop-blur-sm" />
+      <div className="fixed top-0 right-0 bottom-0 w-full sm:w-[400px] bg-[#110e0d] border-l border-white/10 shadow-2xl flex flex-col z-[221]">
+        <div className="flex items-center justify-between border-b border-white/5 pb-5 px-6 pt-8">
           <div>
             <h2 className="m-0 font-serif text-2xl font-bold text-white">Notifications</h2>
-            <p className="mt-1 font-sans text-[13px] text-white/55">Recent updates on your orders.</p>
+            <p className="mt-1 font-sans text-xs text-white/50 uppercase tracking-wider">Stay updated</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={markAllRead}
               disabled={markingAllRead || notifications.length === 0}
-              className="text-xs font-bold uppercase tracking-wider text-cafe-gold hover:text-white transition-colors disabled:opacity-50"
+              className="text-xs font-bold uppercase tracking-wider text-cafe-gold hover:text-white transition-colors disabled:opacity-50 px-3 py-2 rounded-lg hover:bg-white/5"
             >
               Mark all read
             </button>
@@ -151,23 +151,31 @@ export default function NotificationDrawer({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 pb-6 pt-[18px] sm:px-6">
+        <div className="flex-1 overflow-y-auto px-4 pb-6 pt-4">
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/25 bg-red-500/10 px-[14px] py-3 text-[13px] text-red-200">
+            <div className="mb-4 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-200">
               {error}
             </div>
           )}
 
-          <div className="grid gap-2.5">
+          <div className="grid gap-3">
             {loading && (
-              <div className="rounded-[14px] bg-white/[0.03] px-[14px] py-[14px] text-[13px] text-white/70">
-                Loading notifications...
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-pulse flex space-x-2">
+                  <div className="h-2 w-2 bg-cafe-gold rounded-full"></div>
+                  <div className="h-2 w-2 bg-cafe-gold rounded-full delay-75"></div>
+                  <div className="h-2 w-2 bg-cafe-gold rounded-full delay-150"></div>
+                </div>
               </div>
             )}
 
             {!loading && notifications.length === 0 && (
-              <div className="rounded-[14px] bg-white/[0.03] px-[14px] py-[14px] text-[13px] leading-6 text-white/70">
-                You have no notifications right now.
+              <div className="text-center py-12">
+                <div className="mx-auto w-16 h-16 rounded-full bg-white/[0.02] border border-white/5 flex items-center justify-center mb-4">
+                  <span className="text-2xl opacity-50">📭</span>
+                </div>
+                <h3 className="text-white font-serif text-lg mb-1">All caught up</h3>
+                <p className="text-white/40 text-sm">You have no new notifications.</p>
               </div>
             )}
 
@@ -179,22 +187,31 @@ export default function NotificationDrawer({
                 <button
                   key={notification.id}
                   onClick={() => openNotification(notification)}
-                  className={`grid gap-2 rounded-[14px] px-[14px] py-[14px] text-left text-white transition-all duration-300 ${
+                  className={`group relative flex gap-4 rounded-2xl p-4 text-left transition-all duration-300 ${
                     highlighted
-                      ? "border border-amber-400/35 bg-gradient-to-br from-amber-500/25 to-red-500/15 shadow-[inset_0_0_0_1px_rgba(245,158,11,0.16)]"
+                      ? "bg-white/[0.04] shadow-[inset_0_0_0_1px_rgba(202,138,4,0.3)]"
                       : isRead
-                        ? "border border-white/10 bg-white/[0.03]"
-                        : "border border-amber-400/25 bg-gradient-to-br from-amber-500/15 to-red-500/10"
+                        ? "hover:bg-white/[0.02]"
+                        : "bg-white/[0.02] hover:bg-white/[0.04]"
                   }`}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="font-bold">{notification.title}</div>
-                    <div className={`text-xs font-bold ${isRead ? "text-white/45" : "text-amber-200"}`}>
-                      {isRead ? "Read" : "New"}
+                  {!isRead && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-cafe-gold rounded-r-full" />
+                  )}
+                  
+                  <div className="flex-1 min-w-0 pl-1">
+                    <div className="flex items-baseline justify-between gap-2 mb-1">
+                      <div className={`font-bold text-sm truncate ${isRead ? 'text-white/70' : 'text-white'}`}>
+                        {notification.title}
+                      </div>
+                      <div className="text-[10px] font-bold tracking-wider text-white/40 whitespace-nowrap">
+                        {formatDateTime(notification.created_at)}
+                      </div>
+                    </div>
+                    <div className={`text-sm leading-relaxed line-clamp-2 ${isRead ? 'text-white/40' : 'text-white/70'}`}>
+                      {notification.message}
                     </div>
                   </div>
-                  <div className="text-[13px] leading-6 text-white/70">{notification.message}</div>
-                  <div className="text-xs text-white/45">{formatDateTime(notification.created_at)}</div>
                 </button>
               );
             })}

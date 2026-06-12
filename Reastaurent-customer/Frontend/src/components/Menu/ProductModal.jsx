@@ -107,9 +107,9 @@ export default function ProductModal({ item, addons, loading, onClose, onConfirm
           <div className="absolute bottom-6 left-6 right-6 md:hidden">
             <h2 className="text-3xl font-serif font-bold text-white mb-2 shadow-sm">{item.item_name}</h2>
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-bold text-cafe-gold">Rs {basePrice}</span>
+              <span className="text-2xl font-bold text-cafe-gold">£ {basePrice}</span>
               {hasDiscount && (
-                <span className="text-white/40 line-through">Rs {item.price}</span>
+                <span className="text-white/40 line-through">£{item.price}</span>
               )}
             </div>
           </div>
@@ -133,9 +133,9 @@ export default function ProductModal({ item, addons, loading, onClose, onConfirm
             <div className="hidden md:block mb-8">
               <h2 className="text-4xl font-serif font-bold text-white mb-4">{item.item_name}</h2>
               <div className="flex items-center gap-3 mb-6">
-                <span className="text-3xl font-bold text-cafe-gold">Rs {basePrice}</span>
+                <span className="text-3xl font-bold text-cafe-gold">£ {basePrice}</span>
                 {hasDiscount && (
-                  <span className="text-lg text-white/40 line-through">Rs {item.price}</span>
+                  <span className="text-lg text-white/40 line-through">£{item.price}</span>
                 )}
               </div>
               <p className="text-white/70 font-sans text-lg leading-relaxed">
@@ -168,7 +168,7 @@ export default function ProductModal({ item, addons, loading, onClose, onConfirm
                             <button
                               key={addon.id}
                               onClick={() => toggleAddon(addon)}
-                              className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${
+                              className={`flex items-center justify-between p-2   ${
                                 isSelected
                                   ? "border-cafe-gold bg-cafe-gold/5"
                                   : "border-white/10 bg-white/5 hover:bg-white/10"
@@ -184,7 +184,7 @@ export default function ProductModal({ item, addons, loading, onClose, onConfirm
                                   {addon.addon_name}
                                 </span>
                               </div>
-                              <span className="font-bold text-cafe-gold text-sm">+Rs {Number(addon.addon_price || 0).toFixed(2)}</span>
+                              <span className="font-bold text-cafe-gold text-sm">£ {Number(addon.addon_price || 0).toFixed(2)}</span>
                             </button>
                           );
                         })}
@@ -200,7 +200,7 @@ export default function ProductModal({ item, addons, loading, onClose, onConfirm
           <div className="border-t border-white/5 bg-[#1a1715] px-8 py-6">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-white/60 uppercase tracking-widest">Total Price</span>
-              <span className="text-3xl font-serif font-bold text-white">Rs {totalPrice}</span>
+              <span className="text-3xl  font-bold text-white">£ {totalPrice}</span>
             </div>
             <button
               onClick={() => onConfirm(selectedAddons)}

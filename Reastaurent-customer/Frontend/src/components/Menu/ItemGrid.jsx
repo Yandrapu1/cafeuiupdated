@@ -100,14 +100,14 @@ function ItemCard({
             {hasDiscount ? (
               <>
                 <span className=" text-[13px] text-white/40 line-through">
-                  ₹{item.price}
+                  £{item.price}
                 </span>
                 <span className=" text-2xl font-bold text-cafe-gold">
-                  ₹{item.discount_price}
+                  £{item.discount_price}
                 </span>
               </>
             ) : (
-              <span className=" text-2xl font-bold text-cafe-gold">₹{item.price}</span>
+              <span className=" text-2xl font-bold text-cafe-gold">£{item.price}</span>
             )}
           </div>
 

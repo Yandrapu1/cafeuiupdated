@@ -74,7 +74,7 @@ export default function TopSellers() {
                 <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                   <h3 className="text-xl font-serif font-bold text-white shadow-sm">{item.name}</h3>
                   <div className="bg-[#110e0d]/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-cafe-gold font-serif font-bold shadow-lg">
-                    Rs {item.price}
+                    £{item.price}
                   </div>
                 </div>
               </div>

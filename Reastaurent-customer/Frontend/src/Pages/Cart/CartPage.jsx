@@ -109,7 +109,7 @@ export default function CartPage() {
 
     if (paymentMethod === "stripe" && !isStripeAmountAllowed) {
       setErrorMessage(
-        `Online payment minimum is Rs ${STRIPE_MIN_INR_AMOUNT.toFixed(2)}. Please add more items or choose cash on delivery.`
+        `Online payment minimum is £ ${STRIPE_MIN_INR_AMOUNT.toFixed(2)}. Please add more items or choose cash on delivery.`
       );
       setSuccessMessage("");
       return;
@@ -242,7 +242,7 @@ export default function CartPage() {
                           {item.selected_addons.map((addon) => addon.addon_name).join(", ")}
                         </p>
                       )}
-                      <p className=" text-lg font-bold text-cafe-gold">Rs {linePrice.toFixed(2)}</p>
+                      <p className=" text-lg font-bold text-cafe-gold">£ {linePrice.toFixed(2)}</p>
                     </div>
                     <div className="flex items-center rounded-full border border-cafe-gold/30 bg-[#1c1917]">
                       <button onClick={() => onRemove(item.id, item.cart_key)} className="p-3 text-cafe-gold hover:bg-white/5 rounded-l-full">
@@ -312,14 +312,14 @@ export default function CartPage() {
                       <span className="font-bold text-white">Pay Online (Card)</span>
                     </label>
                     {!isStripeAmountAllowed && (
-                      <p className="text-sm text-amber-300">Online payment requires a minimum order of Rs {STRIPE_MIN_INR_AMOUNT.toFixed(2)}.</p>
+                      <p className="text-sm text-amber-300">Online payment requires a minimum order of £ {STRIPE_MIN_INR_AMOUNT.toFixed(2)}.</p>
                     )}
                   </div>
 
                   <div className="bg-black/50 rounded-2xl p-6 mb-6">
                     <div className="flex justify-between items-center text-lg">
                       <span className="text-white/70 font-bold">Total</span>
-                      <span className="font-serif text-3xl font-bold text-cafe-gold">Rs {total.toFixed(2)}</span>
+                      <span className=" text-3xl font-bold text-cafe-gold">£ {total.toFixed(2)}</span>
                     </div>
                   </div>
 
