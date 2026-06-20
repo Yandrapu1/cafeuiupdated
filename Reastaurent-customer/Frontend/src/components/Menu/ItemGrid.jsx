@@ -59,7 +59,7 @@ function ItemCard({
           ) : null}
         </div>
 
-        <div
+        {/* <div
           className={`absolute right-4 top-4 grid h-6 w-6 place-items-center rounded-full border border-white/20 bg-black/40 backdrop-blur-md`}
         >
           <div
@@ -67,7 +67,7 @@ function ItemCard({
               item.is_veg === 1 ? "bg-green-400" : "bg-red-400"
             }`}
           />
-        </div>
+        </div> */}
       </button>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -81,19 +81,14 @@ function ItemCard({
           </p>
         ) : null}
 
-        {/* {item.preparation_time ? (
-          <div className="flex items-center gap-1.5 font-sans text-xs uppercase tracking-wider text-white/40">
-            <span>⏱️</span>
-            <span>{item.preparation_time} min prep</span>
-          </div>
-        ) : null} */}
-
-        {/* <button
-          onClick={() => onOpenAddons(item)}
-          className="self-start border-0 bg-transparent p-0 font-sans text-xs font-semibold tracking-wide text-cafe-gold hover:text-white transition-colors"
-        >
-          Customize details
-        </button> */}
+{item.is_veg &&
+ item.is_veg !== "Not applicable" && (
+  <div className="mt-2">
+    <span className="inline-flex items-center rounded-full bg-green-500/10 px-2 py-1 text-xs font-medium text-green-400 border border-green-500/20">
+      {item.is_veg}
+    </span>
+  </div>
+)}
 
         <div className="mt-auto flex items-end justify-between pt-4">
           <div className="flex flex-col">

@@ -374,7 +374,8 @@ export default function EventsPage() {
                   <input 
                     type="date" 
                     required 
-                    className="w-full border-b border-[#2B1412]/20 bg-transparent py-3 font-sans text-base text-[#2B1412] outline-none transition-colors focus:border-[#2B1412] cursor-pointer"
+                    className="w-full border-b border-[#2B1412]/20 bg-transparent py-3 font-sans text-base text-[#2B1412] outline-none
+                     transition-colors focus:border-[#2B1412] cursor-pointer"
                   />
                   <CalendarDays className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B4B3E]/50" />
                 </div>
@@ -388,7 +389,8 @@ export default function EventsPage() {
 <select
   required
   defaultValue=""
-  className="mt-2 w-full border-b border-[#2B1412]/20 bg-transparent py-3 font-sans text-base text-[#2B1412] outline-none transition-colors focus:border-[#2B1412] cursor-pointer appearance-none"
+  className="mt-2 w-full border-b border-[#2B1412]/20 bg-transparent py-3 font-sans text-base text-[#2B1412] 
+  outline-none transition-colors focus:border-[#2B1412] cursor-pointer appearance-none"
 >
   <option value="" disabled>
     Select an option
@@ -400,6 +402,7 @@ export default function EventsPage() {
   <option value="festivals">Festivals</option>
   <option value="private">Private Parties</option>
   <option value="community">Community Events</option>
+   <option value="community">others</option>
 </select>
               </div>
             </div>

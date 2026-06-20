@@ -3,13 +3,17 @@ import { motion } from 'framer-motion';
 // import BannerCarousel from "../../components/Home/BannerCarousel";
 import Hero from "../../components/Home/Hero";
 import Gallery from "../../components/Home/Gallery";
+import WelcomeOfferModal from "../../components/promotions/WelcomeOfferModal";
 
 import TopSellers from "../../components/Home/TopSellers";
 import Newsletter from "../../components/Home/Newsletter";
 
+const MotionDiv = motion.div;
+
 export default function HomeContent() {
   return (
     <div className="w-full bg-[#0F0B08]">
+      <WelcomeOfferModal />
       <Hero />
       {/* <div className="py-12">
         <BannerCarousel />
@@ -18,7 +22,7 @@ export default function HomeContent() {
       <TopSellers />
 
       {/* Freshly Baked Daily Section */}
-      <section className="py-24 bg-[#0F0B08] relative" id="handcrafted">
+      {/* <section className="py-24 bg-[#0F0B08] relative" id="handcrafted">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <span className="text-cafe-gold font-sans font-bold uppercase tracking-[0.2em] mb-4 block">
@@ -28,7 +32,7 @@ export default function HomeContent() {
               Freshly Baked Daily
             </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
             {[
               {
                 title: "Classic Bagels",
@@ -44,9 +48,14 @@ export default function HomeContent() {
                 title: "Signature Spreads",
                 desc: "Whipped cream cheeses made with fresh, locally sourced ingredients.",
                img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1999&auto=format&fit=crop"
+              },
+              {
+                title: "Fresh Sandwiches",
+                desc: "Crafted daily with premium ingredients, crisp vegetables, and artisan breads.",
+                img: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?q=80&w=2070&auto=format&fit=crop"
               }
             ].map((item, i) => (
-              <motion.div 
+              <MotionDiv 
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -61,11 +70,11 @@ export default function HomeContent() {
                   <h3 className="text-2xl font-serif font-bold text-white mb-3">{item.title}</h3>
                   <p className="text-white/60 font-sans leading-relaxed">{item.desc}</p>
                 </div>
-              </motion.div>
+              </MotionDiv>
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Our Craft / Philosophy Section */}
       <section className="py-24 bg-[#F5EFE6] relative">
@@ -74,7 +83,7 @@ export default function HomeContent() {
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div 
+            <MotionDiv 
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -95,8 +104,8 @@ export default function HomeContent() {
               <button onClick={() => document.getElementById("menu-section")?.scrollIntoView({ behavior: "smooth" })} className="text-[#8B5A33] uppercase font-bold tracking-widest text-sm hover:text-[#2D1B12] transition-colors border-b-2 border-[#8B5A33] pb-1 hover:border-[#2D1B12]">
                 Discover Our Process
               </button>
-            </motion.div>
-            <motion.div 
+            </MotionDiv>
+            <MotionDiv 
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -105,7 +114,7 @@ export default function HomeContent() {
             >
               <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2071&auto=format&fit=crop" alt="Coffee preparation" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#2D1B12]/20 to-transparent" />
-            </motion.div>
+            </MotionDiv>
           </div>
         </div>
       </section>

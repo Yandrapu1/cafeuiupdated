@@ -63,13 +63,14 @@ function Header({
       )}
     >
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-3">
-        <img
-          src={BMLogo}
-          alt="Bagel Master Logo"
-          className="h-16 w-16 rounded-full "
-        />
-      </Link>
+{/* Logo */}
+<Link to="/" className="flex items-center gap-3">
+  <img
+    src={BMLogo}
+    alt="Bagel Master Logo"
+    className="h-20 w-auto object-contain" 
+  />
+</Link>
 
       {/* Center Nav (Hidden on Mobile) */}
       <nav className="hidden md:flex items-center gap-8 font-sans text-sm font-semibold uppercase tracking-widest text-white/80">
@@ -77,8 +78,8 @@ function Header({
         <NavLink to="/menu" className={navLinkClass}>Menu</NavLink>
         <NavLink to="/about" className={navLinkClass}>About</NavLink>
         <NavLink to="/events" className={navLinkClass}>Events</NavLink>
-        {/* <NavLink to="/gallery" className={navLinkClass}>Rewards</NavLink> */}
-        <NavLink to="/contact" className={navLinkClass}>Contact Us</NavLink>
+        <NavLink to="/gallery" className={navLinkClass}>Gallery</NavLink>
+        {/* <NavLink to="/contact" className={navLinkClass}>Contact Us</NavLink> */}
       </nav>
 
       {/* Actions */}
